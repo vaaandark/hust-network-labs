@@ -18,6 +18,7 @@ static const MimeType *get_mime_type(const char *url, size_t url_len) {
         { "jpg", 3, "image/jpeg" },
         { "htm", 3, "text/html" },
         { "html", 4, "text/html" },
+        { "pdf", 3, "application/pdf" },
     };
     for (int i = url_len - 1; i > 0 && url[i] != '.'; --i) {
         const char *suffix = url + i;
@@ -140,8 +141,7 @@ static void *handle_request(void *param) {
         if (send(connection, response_buff, response_len, 0) == -1) {
             INFO("Send error\n");
         }
-        close(connection);
-        return NULL;
+        goto out;
     }
     snprintf(response_buff, sizeof response_buff - 1,
             "HTTP/1.1 200 OK\r\n"
@@ -155,6 +155,8 @@ static void *handle_request(void *param) {
     if (send(connection, response_buff, response_len, 0) == -1) {
         INFO("Send error\n");
     }
+out:
+    free(param);
     close(connection);
     return NULL;
 }
@@ -179,9 +181,9 @@ void server_go(const ServerInfo *server_info, int listener) {
             INFO("New client from %s:%d\n", client_ip, client_port);
         }
         pthread_t thread_id;
-        RequestInfo request_info = {
-            connection, server_info->root
-        };
-        pthread_create(&thread_id, NULL, handle_request, (void *)&request_info);
+        RequestInfo *request_info = (RequestInfo *)malloc(sizeof(RequestInfo));
+        request_info->connection = connection;
+        request_info->root = server_info->root;
+        pthread_create(&thread_id, NULL, handle_request, (void *)request_info);
     }
 }

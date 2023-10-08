@@ -3,7 +3,7 @@
 
 #define BACKLOG 10
 
-#define MAX_BUFF_SIZE 1024 * 32
+#define MAX_BUFF_SIZE (1024 * 1024 * 10)
 #define MAX_IP_LEN 64
 #define MAX_PORT_LEN 8
 #define MAX_URL_LEN 32
