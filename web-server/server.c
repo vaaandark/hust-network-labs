@@ -140,6 +140,7 @@ static void *handle_request(void *param) {
         if (send(connection, response_buff, response_len, 0) == -1) {
             INFO("Send error\n");
         }
+        close(connection);
         return NULL;
     }
     snprintf(response_buff, sizeof response_buff - 1,
